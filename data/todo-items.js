@@ -10,7 +10,6 @@ module.exports = [
     user_id: 1
   },
   {
-    id: 1,
     todo: 'do lab assignment',
     completed: false,
     user_id: 2
