@@ -37,21 +37,72 @@ describe('app routes', () => {
       completed: false
     };
 
-    const createdTodo = [
+    const createdTodo = 
       {
         ...newTodo,
         id: 5,
         user_id: 2
-      }];
+      };
 
-    test('gets and returns all todo\' for a signed in user', async() => {
+    test('creates a new todo', async() => {
+
+      const todo = {
+        'todo': 'wash the dishes',
+        'completed': false
+      };
+
+      const data = await fakeRequest(app)
+        .post('/api/todos')
+        .send(todo)
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200);
+  
+      expect(data.body).toEqual(createdTodo);
+    });
+  
+
+    test('returns all user todos', async() => {
       const data = await fakeRequest(app)
         .get('/api/todos')
         .set('Authorization', token)
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(data.body).toContainEqual([createdTodo]);
+      expect(data.body).toEqual([createdTodo]);
     });
+
+    test('returns one user todo', async() => {
+      const data = await fakeRequest(app)
+        .get('/api/todos/5')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(data.body).toEqual(createdTodo);
+    });
+
+    test('updates one todo', async() => {
+
+      const expectation = {
+        id: 1,
+        todo: 'clean your room',
+        completed: true,
+        user_id: 1
+      };
+
+      const modification = { completed: true };
+
+      const data = await fakeRequest(app)
+        .put('/api/todos/1')
+        .set('Authorization', token)
+        .send(modification)
+        .expect('Content-Type', /json/);
+      //.expect(200);
+
+      expect(data.body).toEqual(expectation);
+    });
+
+
   });
 });
