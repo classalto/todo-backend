@@ -18,6 +18,7 @@ describe('app routes', () => {
       const signInData = await fakeRequest(app)
         .post('/auth/signup')
         .send({
+
           email: 'jon@user.com',
           password: '1234'
         });
@@ -31,35 +32,77 @@ describe('app routes', () => {
       return client.end(done);
     });
 
-    test('returns animals', async() => {
+    const newTodo = {
+      todo: 'wash the dishes',
+      completed: false
+    };
 
-      const expectation = [
-        {
-          'id': 1,
-          'name': 'bessie',
-          'coolfactor': 3,
-          'owner_id': 1
-        },
-        {
-          'id': 2,
-          'name': 'jumpy',
-          'coolfactor': 4,
-          'owner_id': 1
-        },
-        {
-          'id': 3,
-          'name': 'spot',
-          'coolfactor': 10,
-          'owner_id': 1
-        }
-      ];
+    const createdTodo = 
+      {
+        ...newTodo,
+        id: 5,
+        user_id: 2
+      };
+
+    test('creates a new todo', async() => {
+
+      const todo = {
+        'todo': 'wash the dishes',
+        'completed': false
+      };
 
       const data = await fakeRequest(app)
-        .get('/animals')
+        .post('/api/todos')
+        .send(todo)
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200);
+  
+      expect(data.body).toEqual(createdTodo);
+    });
+  
+
+    test('returns all user todos', async() => {
+      const data = await fakeRequest(app)
+        .get('/api/todos')
+        .set('Authorization', token)
         .expect('Content-Type', /json/)
         .expect(200);
 
+      expect(data.body).toEqual([createdTodo]);
+    });
+
+    test('returns one user todo', async() => {
+      const data = await fakeRequest(app)
+        .get('/api/todos/5')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(data.body).toEqual(createdTodo);
+    });
+
+    test('updates one todo', async() => {
+
+      const expectation = {
+        id: 1,
+        todo: 'clean your room',
+        completed: true,
+        user_id: 1
+      };
+
+      const modification = { completed: true };
+
+      const data = await fakeRequest(app)
+        .put('/api/todos/1')
+        .set('Authorization', token)
+        .send(modification)
+        .expect('Content-Type', /json/);
+      //.expect(200);
+
       expect(data.body).toEqual(expectation);
     });
+
+
   });
 });
